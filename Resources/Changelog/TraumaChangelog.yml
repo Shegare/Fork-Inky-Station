@@ -8805,3 +8805,10 @@ Entries:
   id: 1005
   time: '2026-05-20T23:09:46.0000000+00:00'
   url: https://github.com/Trauma-Station/Trauma-Station/pull/2710
+- author: Aviu
+  changes:
+  - type: Remove
+    message: Teleporting with heretic blade no longer takes pulled entity with you.
+  id: 1006
+  time: '2026-05-21T01:53:09.0000000+00:00'
+  url: https://github.com/Trauma-Station/Trauma-Station/pull/2713
