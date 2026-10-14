@@ -15,4 +15,7 @@ public sealed partial class SpaceWhaleTargetComponent : Component
 
     [DataField]
     public EntProtoId<MobCallerComponent> MobCallerProto = "SpaceLeviathanMobCaller";
+
+    [DataField]
+    public TimeSpan ChaseDuration = TimeSpan.FromSeconds(30);
 }

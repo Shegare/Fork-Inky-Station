@@ -20,8 +20,8 @@ using Content.Shared.Movement.Systems;
 using Robust.Shared.Map;
 // inky
 using Robust.Shared.Player;
+using Content.Inky.Common.CCVar;
 using Content.Inky.Common.Whale;
-using Content.Lavaland.Shared.Audio;
 // /inky
 
 namespace Content.Goobstation.Server.SpaceWhale.StationProximity;
@@ -39,7 +39,10 @@ public sealed partial class StationProximitySystem : EntitySystem
     [Dependency] private MovementSpeedModifierSystem _moveSpeed = default!;
 
     private bool _spaceWhaleEnabled;
-    private float _spaceWhaleSpawnDistance; // inky edit
+    // inky edit
+    private float _spaceWhaleSpawnDistance;
+    private bool _spaceWhaleAllowStationApproach;
+    // /inky edit
 
     private static readonly TimeSpan CheckDelay = TimeSpan.FromSeconds(60);
     private TimeSpan _nextCheck = TimeSpan.Zero;
@@ -55,6 +58,7 @@ public sealed partial class StationProximitySystem : EntitySystem
 
         Subs.CVar(_cfg, GoobCVars.SpaceWhaleSpawn, x => _spaceWhaleEnabled = x, true);
         Subs.CVar(_cfg, GoobCVars.SpaceWhaleSpawnDistance, x => _spaceWhaleSpawnDistance = x, true);
+        Subs.CVar(_cfg, InkyCVars.SpaceWhaleAllowStationApproach, x => _spaceWhaleAllowStationApproach = x, true); // inky
 
         // inky
         InitializeInky();
@@ -87,7 +91,11 @@ public sealed partial class StationProximitySystem : EntitySystem
         {
             foreach (var item in caller.SpawnedEntities)
             {
-                EnsureComp<TimedDespawnComponent>(item).Lifetime = 60f; // inky edit
+                // inky edit
+                var chaseDuration = (float) ent.Comp.ChaseDuration.TotalSeconds;
+                EnsureComp<TimedDespawnComponent>(item).Lifetime = chaseDuration;
+                // /inky edit
+
                 _moveSpeed.ChangeBaseSpeed(item, 11, 30, 1);
                 _moveSpeed.RefreshMovementSpeedModifiers(item);
 
@@ -154,11 +162,10 @@ public sealed partial class StationProximitySystem : EntitySystem
         if (!_stations.TryGetValue(ent.Comp.MapID, out var stations))
             return;
 
+        // inky edit
         if (ent.Comp.GridUid is { } gridUid && stations.Any(x => x.Owner == gridUid))
-        {
-            RemCompDeferred<SpaceWhaleTargetComponent>(ent);
             return;
-        }
+        // /inky edit
 
         var humanoidWorldPos = _transform.GetWorldPosition(ent.Comp);
         var closestDistance = float.MaxValue;
@@ -178,10 +185,12 @@ public sealed partial class StationProximitySystem : EntitySystem
             closestDistance = Math.Min(closestDistance, distance);
         }
 
-        if (closestDistance <= _spaceWhaleSpawnDistance)
-            RemCompDeferred<SpaceWhaleTargetComponent>(ent);
-        else
+        // inky edit
+        if (closestDistance > _spaceWhaleSpawnDistance)
             HandleFarFromStation(ent);
+        else if (!_spaceWhaleAllowStationApproach)
+            RemCompDeferred<SpaceWhaleTargetComponent>(ent);
+        // /inky edit
     }
 
     private void HandleFarFromStation(EntityUid ent)
