@@ -44,7 +44,7 @@ public sealed partial class StationProximitySystem : EntitySystem
     private bool _spaceWhaleAllowStationApproach;
     // /inky edit
 
-    private static readonly TimeSpan CheckDelay = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan CheckDelay = TimeSpan.FromSeconds(20); // inky edit
     private TimeSpan _nextCheck = TimeSpan.Zero;
 
     private readonly Dictionary<MapId, HashSet<Entity<MapGridComponent, TransformComponent>>> _stations = new();
@@ -92,8 +92,8 @@ public sealed partial class StationProximitySystem : EntitySystem
             foreach (var item in caller.SpawnedEntities)
             {
                 // inky edit
-                var chaseDuration = (float) ent.Comp.ChaseDuration.TotalSeconds;
-                EnsureComp<TimedDespawnComponent>(item).Lifetime = chaseDuration;
+                var despawnDelay = (float) ent.Comp.DespawnDelay.TotalSeconds;
+                EnsureComp<TimedDespawnComponent>(item).Lifetime = despawnDelay;
                 // /inky edit
 
                 _moveSpeed.ChangeBaseSpeed(item, 11, 30, 1);
