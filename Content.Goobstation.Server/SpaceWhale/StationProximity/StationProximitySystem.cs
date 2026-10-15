@@ -162,10 +162,11 @@ public sealed partial class StationProximitySystem : EntitySystem
         if (!_stations.TryGetValue(ent.Comp.MapID, out var stations))
             return;
 
-        // inky edit
         if (ent.Comp.GridUid is { } gridUid && stations.Any(x => x.Owner == gridUid))
+        {
+            RemCompDeferred<SpaceWhaleTargetComponent>(ent);
             return;
-        // /inky edit
+        }
 
         var humanoidWorldPos = _transform.GetWorldPosition(ent.Comp);
         var closestDistance = float.MaxValue;
